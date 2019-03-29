@@ -1,0 +1,100 @@
+<!--  (click)="this[field.funcion](item.value)"  [formControlName]="models.inputs[i].name"  [formGroup]="catalogForm"-->
+
+<div class="container">
+   <h1> <i [class]="models.form.icon"></i> &nbsp; {{ models.form.title }}</h1>
+  <hr>
+  <form  #f="ngForm" [formGroup]="catalogForm"   validate  (ngSubmit)=parseForm(f.valid)>
+        <div class="form-row">
+          <ng-container *ngFor = "let fields of models.inputs; let i = index">
+              <!-- INPUTS -->
+              <div [class]="models.inputs[i].wrapperClass" *ngIf="models.inputs[i].type === 'text'">
+                <label [for]="models.inputs[i].name">{{ models.inputs[i].label }}
+                  <span *ngIf="models.inputs[i].required" class="zippy-inputs__required">*</span>
+                </label>
+                <input [formControlName]="models.inputs[i].name"
+                       [placeholder]="models.inputs[i].placeholder"
+                       [name]="models.inputs[i].name"
+                       [class]="models.inputs[i].inputClass" *ngIf="models.inputs[i].type === 'text'"
+                       [type]="models.inputs[i].type"
+                       [readOnly]="models.inputs[i].readOnly"
+                       autocomplete="off"
+                       >
+                 <span class="alert-danger zippy-inputs__error" *ngIf="catalogForm.get(models.inputs[i].name).invalid &&
+                  (!catalogForm.get(models.inputs[i].name).pristine || catalogForm.get(models.inputs[i].name).touched) ">{{models.inputs[i].errorMsg}}</span>
+              </div>
+            <div [class]="models.inputs[i].wrapperClass" *ngIf="models.inputs[i].type === 'number'">
+              <label [for]="models.inputs[i].name">{{ models.inputs[i].label }}
+                <span *ngIf="models.inputs[i].required" class="zippy-inputs__required">*</span>
+              </label>
+              <input [formControlName]="models.inputs[i].name"
+                     [placeholder]="models.inputs[i].placeholder"
+                     [name]="models.inputs[i].name"
+                     [class]="models.inputs[i].inputClass" *ngIf="models.inputs[i].type === 'number'"
+                     [type]="models.inputs[i].type"
+                     [readOnly]="models.inputs[i].readOnly"
+                     [min]="models.inputs[i].min"
+                     [max]="models.inputs[i].max"
+               >
+            </div>
+              <!-- TYPEAHEAD  -->
+              <div [class]="models.inputs[i].wrapperClass" *ngIf="models.inputs[i].type === 'typeahead'">
+                <label [for]="models.inputs[i].name">{{ models.inputs[i].label }}
+                  <span *ngIf="models.inputs[i].required" class="zippy-inputs__required">*</span>
+                </label>
+                <input [formControlName]="models.inputs[i].name"
+                       [placeholder]="models.inputs[i].placeholder"
+                       [name]="models.inputs[i].name"
+                       [class]="models.inputs[i].inputClass"
+                       [type]="models.inputs[i].type"
+                       [readOnly]="models.inputs[i].readOnly"
+                       autocomplete="off"
+                       (keyup)="parseTypeAhead($event,models.inputs[i].functionKeyUp)"
+                       >
+                       <input type="hidden" [formControlName]="models.inputs[i].inputCodeName">
+
+                       <div class="typeahead--wrapper" *ngIf="!typeAheadVisible">
+                          <ul class="typeahead--ul" *ngFor="let data of returnTAdata">
+                            <li (click)="getTypeAheadData(data.value , data.item , models.inputs[i].name , models.inputs[i].inputCodeName)" class="typeahead--list">{{ data.item }}</li>
+                          </ul>
+                       </div>
+                  <span class="alert-danger zippy-inputs__error" *ngIf="catalogForm.get(models.inputs[i].name).invalid &&
+                  (!catalogForm.get(models.inputs[i].name).pristine || catalogForm.get(models.inputs[i].name).touched) ">
+                  {{models.inputs[i].errorMsg}}
+                </span>
+              </div>
+              <!-- DATEPICKER  -->
+              <div  [class]="models.inputs[i].wrapperClass" *ngIf="models.inputs[i].type === 'datepicker'">
+                  <label [for]="models.inputs[i].name">{{ models.inputs[i].label }}
+                      <span *ngIf="models.inputs[i].required" class="zippy-inputs__required">*</span>
+                    </label>
+                <input [bsConfig]="bsConfig"
+                         type="text" *ngIf="models.inputs[i].type === 'datepicker'"
+                         [placeholder]="models.inputs[i].placeholder"
+                         [formControlName]="models.inputs[i].name"
+                         bsDatepicker
+                         [class]="models.inputs[i].inputClass"
+                         [placement]="models.inputs[i].position">
+              </div>
+              <!-- DATERANGEPICKER  -->
+              <div  [class]="models.inputs[i].wrapperClass" *ngIf="models.inputs[i].type === 'daterangepicker'">
+                  <label [for]="models.inputs[i].name">{{ models.inputs[i].label }}
+                      <span *ngIf="models.inputs[i].required" class="zippy-inputs__required">*</span>
+                    </label>
+                <input [bsConfig]="bsConfig"
+                         type="text" *ngIf="models.inputs[i].type === 'daterangepicker'"
+                         [placeholder]="models.inputs[i].placeholder"
+                         [formControlName]="models.inputs[i].name"
+                         bsDaterangepicker
+                         [class]="models.inputs[i].inputClass"
+                         [placement]="models.inputs[i].position">
+              </div>
+          </ng-container>
+        </div>
+          <!-- BUTTONS -->
+          <ng-container *ngFor = "let fields of models.buttons; let i = index">
+             <button   [type]="models.buttons[i].buttonType" [class]="models.buttons[i].buttonClass"> {{ models.buttons[i].buttonLabel}}</button>
+             &nbsp;
+          </ng-container>
+
+  </form>
+ </div><!--CONTAINER FLUID -->

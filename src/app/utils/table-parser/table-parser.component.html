@@ -1,0 +1,171 @@
+
+     <div class="row" >
+             <div class="col-md-8">
+                <h3> <i [class]="tableData.table.icon"></i> &nbsp; {{ tableData.table.name }}</h3>
+             </div>
+             <div class="col-md-2 right">
+               <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                 <button type="button" data-toggle="modal" data-target="#myModal" class="btn btn-primary">
+                   <i style="" class="fa fa-cogs" aria-hidden="true"></i>
+                 </button>
+
+                 <div class="btn-group" role="group">
+                   <button id="btnGroupDrop1" type="bustton" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                     <i class="fa fa-wrench" aria-hidden="true"></i>
+                   </button>
+                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                     <ng-container >
+
+                       <a  *ngFor="let titles of tableData.columnsName; let i = index" class="dropdown-item" href="#">
+                         <i (click)="hideColumns(titles.hide)" class="zippy__pointer" id="{{titles.hide}}_i"   class="fa fa-eye" aria-hidden="true"></i>
+                         &nbsp;
+                         <i (click)="moveColumnsLeft(i)" class="fa fa-caret-left" aria-hidden="true"></i>
+                         &nbsp;
+                         <i (click)="moveColumnsRight(i)" class="fa fa-caret-right" aria-hidden="true"></i>
+                         &nbsp;
+
+                         {{ titles.title }}
+                       </a>
+
+                     </ng-container>
+
+                    </div>
+                 </div>
+               </div>
+             </div>
+      </div>
+      <br>
+  <div class="table-responsive">
+    <table class="table table-bordered shadow-table">
+        <caption class="text-center">{{ tableData.table.caption }}</caption>
+       <thead [class]="tableData.table.headerClass">
+        <tr>
+          <th  *ngFor="let titles of tableData.columnsName" [class]="titles.hide" scope="col">
+            {{ titles.title }}
+           <ng-container *ngIf="isSortable">
+              <i *ngIf="sortArrayUp"    (click)="reverseTable('up')" class="fa fa-arrow-up small-arrow zippy__pointer" aria-hidden="true"></i>
+              <i *ngIf="sortArrayDown"   (click)="reverseTable('down')" class="fa fa-arrow-down small-arrow zippy__pointer" aria-hidden="true"></i>
+           </ng-container>
+
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let parseData of tableData.data | paginate: { itemsPerPage: items, currentPage: p }">
+          <td [class]="column.title" *ngFor="let column of tableData.rowsName">
+            {{ parseData[column.title] }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <hr>
+    <div id="pagination" align="right" *ngIf="showPagination">
+      <pagination-controls
+        (pageChange)="p = $event"
+        [previousLabel]="labels.previousLabel"
+        [nextLabel]="labels.nextLabel"
+        >
+      </pagination-controls>
+    </div>
+
+  </div>
+
+     <!-- The Modal -->
+     <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+              <h4 class="modal-title">Filtros</h4>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="container">
+
+                   <form  #f="ngForm" [formGroup]="searchForm"   validate  (ngSubmit)=parseSearchForm()>
+                         <div class="form-row">
+                           <ng-container *ngFor = "let fields of filters; let i = index">
+                               <!-- INPUTS -->
+                                <div [class]="filters[i].wrapperClass" *ngIf="filters[i].type === 'text'">
+                                  <input [formControlName]="filters[i].name"
+                                        [placeholder]="filters[i].placeholder"
+                                        [name]="filters[i].name"
+                                        [class]="filters[i].inputClass" *ngIf="filters[i].type === 'text'"
+                                        [type]="filters[i].type"
+                                        [readOnly]="filters[i].readOnly"
+                                        autocomplete="off"
+                                        >
+                                </div>
+                             <div [class]="filters[i].wrapperClass" *ngIf="filters[i].type === 'number'">
+                               <input [formControlName]="filters[i].name"
+                                      [placeholder]="filters[i].placeholder"
+                                      [name]="filters[i].name"
+                                      [class]="filters[i].inputClass" *ngIf="filters[i].type === 'number'"
+                                      [type]="filters[i].type"
+                                      [readOnly]="filters[i].readOnly"
+                                      [min]="filters[i].min"
+                                      [max]="filters[i].max"
+                                >
+                             </div>
+                                <!-- DATEPICKER  -->
+                                <div  [class]="filters[i].wrapperClass" *ngIf="filters[i].type === 'datepicker'">
+                                    <input [bsConfig]="bsConfig"
+                                           type="text" *ngIf="filters[i].type === 'datepicker'"
+                                           [placeholder]="filters[i].placeholder"
+                                           [formControlName]="filters[i].name"
+                                           bsDatepicker
+                                           [class]="filters[i].inputClass"
+                                           [placement]="filters[i].placement">
+                                </div>
+                                <!-- DATERANGEPICKER  -->
+                                <div  [class]="filters[i].wrapperClass" *ngIf="filters[i].type === 'daterangepicker'">
+                                    <input [bsConfig]="bsConfig"
+                                           type="text" *ngIf="filters[i].type === 'daterangepicker'"
+                                           [placeholder]="filters[i].placeholder"
+                                           [formControlName]="filters[i].name"
+                                           bsDaterangepicker
+                                           [class]="filters[i].inputClass"
+                                           [placement]="filters[i].placement">
+                                </div>
+                                <div class="form-group theme-blue">
+                                  <select  class="form-control col-md-12"
+                                           formControlName  ="{{filters[i].name}}_filter">
+                                    <option value="">Seleccione una opcion</option>
+                                    <ng-container *ngIf="filters[i].filterType === 'normal'">
+                                      <option value="">Contiene</option>
+                                      <option value="">Igual que</option>
+                                      <option value="">Diferente que</option>
+                                      <option value="">Comienza con</option>
+                                      <option value="">Termina en</option>
+                                    </ng-container>
+                                    <ng-container *ngIf="filters[i].filterType === 'date'">
+                                      <option value="">Rango</option>
+                                      <option value="">Desde</option>
+                                      <option value="">Hasta</option>
+                                    </ng-container>
+                                  </select>
+                                </div>
+                           </ng-container>
+                         </div>
+
+                     <div class="modal-footer">
+                       <button type="submit" class="btn btn-primary">
+                         <i class="fa fa-filter" aria-hidden="true"></i>  Filtrar
+                       </button>
+                       <button type="button" class="btn btn-danger" data-dismiss="modal">
+                         Cerrar
+                       </button>
+                     </div>
+                   </form>
+                  </div><!--CONTAINER FLUID -->
+            </div>
+
+            <!-- Modal footer -->
+
+
+          </div>
+        </div>
+      </div>
